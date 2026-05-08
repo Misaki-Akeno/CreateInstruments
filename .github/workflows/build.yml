@@ -1,6 +1,14 @@
 name: Build
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -17,14 +25,40 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+          cache: gradle
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      # This is needed to be able to run ./gradlew below
-      # You can run `git update-index --chmod +x gradlew` then remove this step.
-      - name: Make Gradle wrapper executable
-        run: chmod +x ./gradlew
+      - name: Build mod jar
+        run: ./gradlew buildRepo --no-daemon
 
-      - name: Build with Gradle
-        run: ./gradlew build
+      - name: Find built jar
+        id: findjar
+        run: |
+          JAR_PATH=$(find build/repo -name "createinstruments-*.jar" ! -name "*-sources.jar" ! -name "*-javadoc.jar" -type f | head -1)
+          echo "jar_path=${JAR_PATH}" >> "$GITHUB_OUTPUT"
+          echo "jar_name=$(basename "$JAR_PATH")" >> "$GITHUB_OUTPUT"
+
+      - name: Upload mod jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: createinstruments-${{ steps.findjar.outputs.jar_name }}
+          path: ${{ steps.findjar.outputs.jar_path }}
+          retention-days: 30
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: "createinstruments-*/**/*.jar"
+          generate_release_notes: true

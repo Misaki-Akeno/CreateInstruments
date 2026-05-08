@@ -1,0 +1,8 @@
+{
+  "itemGroup.createinstruments": "机械仪表",
+
+  "block.createinstruments.dashboard": "紧凑仪表盘",
+  "block.createinstruments.dashboard.slot": "仪表 %s",
+  "block.createinstruments.dashboard.goggle_header": "仪表盘",
+  "block.createinstruments.dashboard.no_data": "暂无数据"
+}

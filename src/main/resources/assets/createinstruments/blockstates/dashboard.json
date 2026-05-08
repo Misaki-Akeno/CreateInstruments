@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=south": { "model": "createinstruments:block/dashboard" },
+    "facing=north": { "model": "createinstruments:block/dashboard", "y": 180 },
+    "facing=east":  { "model": "createinstruments:block/dashboard", "y": 90 },
+    "facing=west":  { "model": "createinstruments:block/dashboard", "y": 270 }
+  }
+}

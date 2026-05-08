@@ -1,7 +1,10 @@
 {
-  "itemGroup.createinstruments": "Example Mod Tab",
-  "block.createinstruments.example_block": "Example Block",
-  "item.createinstruments.example_item": "Example Item",
+  "itemGroup.createinstruments": "Create Instruments",
+
+  "block.createinstruments.dashboard": "Compact Dashboard",
+  "block.createinstruments.dashboard.slot": "Gauge %s",
+  "block.createinstruments.dashboard.goggle_header": "Dashboard",
+  "block.createinstruments.dashboard.no_data": "No data",
 
   "createinstruments.configuration.title": "Create Instruments Configs",
   "createinstruments.configuration.section.createinstruments.common.toml": "Create Instruments Configs",

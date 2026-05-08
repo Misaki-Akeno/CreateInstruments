@@ -1,0 +1,23 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "front":     "createinstruments:block/dashboard_face",
+    "side":      "createinstruments:block/dashboard_casing",
+    "particle":  "createinstruments:block/dashboard_casing"
+  },
+  "elements": [
+    {
+      "comment": "16x16x4 thin panel, face on south (+z) side",
+      "from": [0, 0, 12],
+      "to":   [16, 16, 16],
+      "faces": {
+        "north": { "texture": "#side",  "cullface": "north" },
+        "south": { "texture": "#front", "cullface": "south" },
+        "east":  { "texture": "#side",  "cullface": "east"  },
+        "west":  { "texture": "#side",  "cullface": "west"  },
+        "up":    { "texture": "#side",  "cullface": "up"    },
+        "down":  { "texture": "#side",  "cullface": "down"  }
+      }
+    }
+  ]
+}
