@@ -20,7 +20,6 @@ import net.minecraft.world.level.block.state.BlockState;
 public class DashboardBlockEntity extends SmartBlockEntity implements IHaveGoggleInformation {
 
     private static final Pattern NUMBER_PATTERN = Pattern.compile("[-+]?\\d*\\.?\\d+");
-    private static final float MAX_DIAL_VALUE = 256f;
 
     public float[] dialTargets   = new float[4];
     public float[] dialStates    = new float[4];
@@ -53,19 +52,44 @@ public class DashboardBlockEntity extends SmartBlockEntity implements IHaveGoggl
 
     private float parseNeedle(String text) {
         if (text == null || text.isBlank()) return 0f;
+
+        // Progress bar: "████░░░" — count filled(█) vs empty(░) blocks
+        long filled = text.chars().filter(c -> c == '█').count();
+        long empty  = text.chars().filter(c -> c == '▒').count();
+        if (filled + empty > 0) return (float) filled / (filled + empty);
+
+        // Percentage: take LAST number before '%' to correctly handle labels like "Room 1 75%"
         if (text.contains("%")) {
+            int pctIdx = text.indexOf('%');
+            Matcher m = NUMBER_PATTERN.matcher(text.substring(0, pctIdx));
+            float last = -1f;
+            while (m.find()) {
+                try { last = Float.parseFloat(m.group()); } catch (NumberFormatException ignored) {}
+            }
+            if (last >= 0f) return Math.max(0f, last / 100f);
+        }
+
+        // RPM (KineticSpeed): "750.5 RPM" → scale by 256
+        if (text.toLowerCase().contains("rpm")) {
             Matcher m = NUMBER_PATTERN.matcher(text);
             if (m.find()) {
-                try {
-                    return Math.min(1f, Math.max(0f, Float.parseFloat(m.group()) / 100f));
-                } catch (NumberFormatException ignored) {}
+                try { return Math.max(0f, Math.abs(Float.parseFloat(m.group())) / 256f); }
+                catch (NumberFormatException ignored) {}
             }
         }
+
+        // Generic number: extract first numeric value, then inspect suffix to pick denominator
         Matcher m = NUMBER_PATTERN.matcher(text);
         if (m.find()) {
             try {
                 float val = Math.abs(Float.parseFloat(m.group()));
-                return Math.min(1f, val / MAX_DIAL_VALUE);
+                // Has a non-numeric unit suffix (e.g. "0.75 SU") → treat as /64 unknown unit
+                String suffix = text.substring(m.end()).trim();
+                if (!suffix.isEmpty()) return Math.max(0f, val / 64f);
+                // Plain integer-like and in [0,15]: likely RedstonePower (0-15) → /16
+                if (val <= 15f) return Math.max(0f, val / 16f);
+                // Larger plain count (AccumulatedItemCount, etc.) → /64; allows multi-rotation
+                return Math.max(0f, val / 64f);
             } catch (NumberFormatException ignored) {}
         }
         return 0f;
@@ -79,12 +103,13 @@ public class DashboardBlockEntity extends SmartBlockEntity implements IHaveGoggl
 
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        CreateLang.translate("block.createinstruments.dashboard.goggle_header").forGoggles(tooltip);
+        CreateLang.builder().add(Component.translatable("block.createinstruments.dashboard.goggle_header")).forGoggles(tooltip);
         boolean hasAny = false;
         for (int i = 0; i < 4; i++) {
             String val = displayedValues[i];
             if (val != null && !val.isBlank()) {
-                CreateLang.translate("block.createinstruments.dashboard.slot", i + 1)
+                CreateLang.builder()
+                    .add(Component.translatable("block.createinstruments.dashboard.slot", i + 1))
                     .space()
                     .add(Component.literal(val))
                     .forGoggles(tooltip, 1);
@@ -92,7 +117,7 @@ public class DashboardBlockEntity extends SmartBlockEntity implements IHaveGoggl
             }
         }
         if (!hasAny) {
-            CreateLang.translate("block.createinstruments.dashboard.no_data").forGoggles(tooltip, 1);
+            CreateLang.builder().add(Component.translatable("block.createinstruments.dashboard.no_data")).forGoggles(tooltip, 1);
         }
         return true;
     }

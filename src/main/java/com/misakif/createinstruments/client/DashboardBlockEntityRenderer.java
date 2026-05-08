@@ -63,8 +63,8 @@ public class DashboardBlockEntityRenderer extends SafeBlockEntityRenderer<Dashbo
         ms.translate(-0.5, -0.5, -0.5);
 
         for (int i = 0; i < 4; i++) {
-            float progress = Mth.clamp(
-                    Mth.lerp(partialTicks, be.prevDialStates[i], be.dialStates[i]), 0f, 1f);
+            float progress = Math.max(0f,
+                    Mth.lerp(partialTicks, be.prevDialStates[i], be.dialStates[i]));
 
             // Gauge layout (SOUTH frame, panel face at z=1.0):
             // i=0 top-left, i=1 top-right, i=2 bottom-left, i=3 bottom-right
