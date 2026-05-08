@@ -6,11 +6,15 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.simibubi.create.foundation.blockEntity.renderer.SafeBlockEntityRenderer;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
@@ -30,14 +34,27 @@ public class DashboardBlockEntityRenderer extends SafeBlockEntityRenderer<Dashbo
 
     public DashboardBlockEntityRenderer(BlockEntityRendererProvider.Context context) {}
 
+    private static float whiteU = Float.NaN, whiteV = Float.NaN;
+
+    private static void ensureWhiteUV() {
+        if (!Float.isNaN(whiteU)) return;
+        TextureAtlasSprite sprite = Minecraft.getInstance()
+                .getModelManager()
+                .getAtlas(TextureAtlas.LOCATION_BLOCKS)
+                .getSprite(ResourceLocation.parse("minecraft:block/white_concrete"));
+        whiteU = (sprite.getU0() + sprite.getU1()) * 0.5f;
+        whiteV = (sprite.getV0() + sprite.getV1()) * 0.5f;
+    }
+
     @Override
     protected void renderSafe(DashboardBlockEntity be, float partialTicks, PoseStack ms,
                                MultiBufferSource buffer, int light, int overlay) {
         BlockState state = be.getBlockState();
         if (!(state.getBlock() instanceof DashboardBlock)) return;
 
+        ensureWhiteUV();
         Direction facing = state.getValue(DashboardBlock.FACING);
-        VertexConsumer vc = buffer.getBuffer(RenderType.cutoutMipped());
+        VertexConsumer vc = buffer.getBuffer(RenderType.solid());
 
         ms.pushPose();
         // Center → rotate to match FACING → restore center offset
@@ -98,9 +115,10 @@ public class DashboardBlockEntityRenderer extends SafeBlockEntityRenderer<Dashbo
                               float x2, float y2, float x3, float y3,
                               float r, float g, float b) {
         int ri = (int) (r * 255), gi = (int) (g * 255), bi = (int) (b * 255);
-        vc.addVertex(pose, x0, y0, 0).setColor(ri, gi, bi, 255).setUv(0, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(norm, 0, 0, 1);
-        vc.addVertex(pose, x1, y1, 0).setColor(ri, gi, bi, 255).setUv(1, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(norm, 0, 0, 1);
-        vc.addVertex(pose, x2, y2, 0).setColor(ri, gi, bi, 255).setUv(1, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(norm, 0, 0, 1);
-        vc.addVertex(pose, x3, y3, 0).setColor(ri, gi, bi, 255).setUv(0, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(norm, 0, 0, 1);
+        // All 4 verts sample the same white-concrete pixel so vertex color drives the final color
+        vc.addVertex(pose, x0, y0, 0).setColor(ri, gi, bi, 255).setUv(whiteU, whiteV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(norm, 0, 0, 1);
+        vc.addVertex(pose, x1, y1, 0).setColor(ri, gi, bi, 255).setUv(whiteU, whiteV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(norm, 0, 0, 1);
+        vc.addVertex(pose, x2, y2, 0).setColor(ri, gi, bi, 255).setUv(whiteU, whiteV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(norm, 0, 0, 1);
+        vc.addVertex(pose, x3, y3, 0).setColor(ri, gi, bi, 255).setUv(whiteU, whiteV).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(norm, 0, 0, 1);
     }
 }

@@ -54,7 +54,7 @@ public class DashboardBlock extends Block implements IBE<DashboardBlockEntity> {
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
+        return RenderShape.MODEL;
     }
 
     @Override
