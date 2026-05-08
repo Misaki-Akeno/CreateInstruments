@@ -15,7 +15,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
@@ -64,7 +63,7 @@ public class DashboardBlockEntityRenderer extends SafeBlockEntityRenderer<Dashbo
             ms.mulPose(new Quaternionf().rotationZ(angle));
 
             Matrix4f pose = ms.last().pose();
-            Matrix3f norm = ms.last().normal();
+            PoseStack.Pose norm = ms.last();
 
             // Front part of needle (tip)
             quad(vc, pose, norm, light,
@@ -83,7 +82,7 @@ public class DashboardBlockEntityRenderer extends SafeBlockEntityRenderer<Dashbo
             ms.pushPose();
             ms.translate(gx, gy, gz + 0.002f);
             Matrix4f pp = ms.last().pose();
-            Matrix3f pn = ms.last().normal();
+            PoseStack.Pose pn = ms.last();
             quad(vc, pp, pn, light,
                     -PIVOT_HALF, -PIVOT_HALF,  PIVOT_HALF, -PIVOT_HALF,
                      PIVOT_HALF,  PIVOT_HALF, -PIVOT_HALF,  PIVOT_HALF,
@@ -94,7 +93,7 @@ public class DashboardBlockEntityRenderer extends SafeBlockEntityRenderer<Dashbo
         ms.popPose();
     }
 
-    private static void quad(VertexConsumer vc, Matrix4f pose, Matrix3f norm, int light,
+    private static void quad(VertexConsumer vc, Matrix4f pose, PoseStack.Pose norm, int light,
                               float x0, float y0, float x1, float y1,
                               float x2, float y2, float x3, float y3,
                               float r, float g, float b) {

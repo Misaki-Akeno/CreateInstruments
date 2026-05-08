@@ -31,19 +31,19 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build mod jar
-        run: ./gradlew buildRepo --no-daemon
+        run: ./gradlew jar --no-daemon
 
       - name: Find built jar
         id: findjar
         run: |
-          JAR_PATH=$(find build/repo -name "createinstruments-*.jar" ! -name "*-sources.jar" ! -name "*-javadoc.jar" -type f | head -1)
+          JAR_PATH=$(find build/libs -name "createinstruments-*.jar" ! -name "*-sources.jar" ! -name "*-javadoc.jar" -type f | head -1)
           echo "jar_path=${JAR_PATH}" >> "$GITHUB_OUTPUT"
           echo "jar_name=$(basename "$JAR_PATH")" >> "$GITHUB_OUTPUT"
 
       - name: Upload mod jar
         uses: actions/upload-artifact@v4
         with:
-          name: createinstruments-${{ steps.findjar.outputs.jar_name }}
+          name: ${{ steps.findjar.outputs.jar_name }}
           path: ${{ steps.findjar.outputs.jar_path }}
           retention-days: 30
 
@@ -60,5 +60,5 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: "createinstruments-*/**/*.jar"
+          files: "**/createinstruments-*.jar"
           generate_release_notes: true

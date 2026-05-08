@@ -53,15 +53,21 @@ public class CreateInstruments {
     public static final DeferredItem<BlockItem> DASHBOARD_ITEM =
             ITEMS.registerSimpleBlockItem("dashboard", DASHBOARD_BLOCK);
 
+    @SuppressWarnings("unchecked")
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<DashboardBlockEntity>> DASHBOARD_BE =
-            BLOCK_ENTITY_TYPES.register("dashboard", () ->
-                    BlockEntityType.Builder.of(DashboardBlockEntity::new, DASHBOARD_BLOCK.get())
-                            .build(null));
+            BLOCK_ENTITY_TYPES.register("dashboard", () -> {
+                BlockEntityType<DashboardBlockEntity>[] ref = new BlockEntityType[1];
+                ref[0] = BlockEntityType.Builder.of(
+                        (pos, state) -> new DashboardBlockEntity(ref[0], pos, state),
+                        DASHBOARD_BLOCK.get())
+                        .build(null);
+                return ref[0];
+            });
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> INSTRUMENTS_TAB =
             CREATIVE_MODE_TABS.register("instruments_tab", () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.createinstruments"))
-                    .withTabsBefore(CreativeModeTabs.REDSTONE)
+                    .withTabsBefore(CreativeModeTabs.REDSTONE_BLOCKS)
                     .icon(() -> DASHBOARD_ITEM.get().getDefaultInstance())
                     .displayItems((parameters, output) -> output.accept(DASHBOARD_ITEM.get()))
                     .build());
@@ -75,7 +81,7 @@ public class CreateInstruments {
         CREATIVE_MODE_TABS.register(modEventBus);
         BLOCK_ENTITY_TYPES.register(modEventBus);
 
-        modContainer.registerConfig(net.neoforged.fml.ModConfig.Type.COMMON, Config.SPEC);
+        modContainer.registerConfig(net.neoforged.fml.config.ModConfig.Type.COMMON, Config.SPEC);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
@@ -84,7 +90,7 @@ public class CreateInstruments {
     }
 
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == CreativeModeTabs.REDSTONE) {
+        if (event.getTabKey() == CreativeModeTabs.REDSTONE_BLOCKS) {
             event.accept(DASHBOARD_ITEM);
         }
     }
