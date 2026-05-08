@@ -1,0 +1,13 @@
+{
+  "itemGroup.createinstruments": "Example Mod Tab",
+  "block.createinstruments.example_block": "Example Block",
+  "item.createinstruments.example_item": "Example Item",
+
+  "createinstruments.configuration.title": "Create Instruments Configs",
+  "createinstruments.configuration.section.createinstruments.common.toml": "Create Instruments Configs",
+  "createinstruments.configuration.section.createinstruments.common.toml.title": "Create Instruments Configs",
+  "createinstruments.configuration.items": "Item List",
+  "createinstruments.configuration.logDirtBlock": "Log Dirt Block",
+  "createinstruments.configuration.magicNumberIntroduction": "Magic Number Text",
+  "createinstruments.configuration.magicNumber": "Magic Number"
+}
